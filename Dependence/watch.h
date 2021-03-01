@@ -38,8 +38,6 @@ void SEND(void);					//Function to send data to the server
 void RECEIVE(void);					//Function to receive data from the server
 
 
-DFRobot_Heartrate heartrate(DIGITAL_MODE);
-
 
 class Data_monitoring {
 public:
