@@ -8,10 +8,6 @@
 #include "watch.h"
 #include "TimerOne.h"
 
-#define ssid "qwe"
-#define password "123"
-#define heartrate_pin A0
-
 
 #define heartrate_pin A0
 #define vibrate_pin A1
