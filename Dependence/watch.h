@@ -3,28 +3,23 @@
   by Yishun Zhao
  */
 
+#if defined(ARDUINO_ARCH_SAMD)
+#define SerialMonitorInterface SerialUSB
+#else
+#define SerialMonitorInterface Serial
+#endif
+
 
 #ifndef _WATCH_h
 #define _WATCH_h
-
-#if defined(ARDUINO) && ARDUINO >= 100
-	#include "arduino.h"
-#else
-	#include "WProgram.h"
 #endif
 
 
-#endif
-
-
-//#include "sensors.h"				//the library declears sensors functions
-#include <WiFi.h>
+#include <WiFi101.h>
 #include <Wire.h>
 #include <ACROBOTIC_SSD1306.h>		//library for displaying data
 #include <ArduinoJson.h>			//library for serialization and deserialization
 #include <DFRobot_Heartrate.h>		//library for heart rate sensor
-
-//#define heartrate_pin A0
 
 #define xStill 1636
 #define yStill 192
@@ -33,11 +28,14 @@
 
 
 void con_to_wifi(char* ssid, char* password);
-void mean(double* nums);
+uint16_t mean_val(uint16_t* nums);
 void SEND(void);					//Function to send data to the server
 void RECEIVE(void);					//Function to receive data from the server
+void screen_ini();
 
 
+DFRobot_Heartrate heartrate(DIGITAL_MODE);
+enum Var_name { Stepping, Heart_rate, StepCount, Calories_burning, Sleeping };
 
 class Data_monitoring {
 public:
@@ -46,6 +44,8 @@ public:
 	void heartrate_tracker();
 	void calories_buring_tracker();
 	void whether_sleeping();
+	char get_data(Var_name name);
+	void display_data();  //display function is used to display massage on screen
 
 private:
 	bool stepping;
@@ -57,22 +57,11 @@ private:
 };
 
 
-class Display {
-public:
-	void ini();
-	void display_function();  //display function is used to display massage on screen
-
-private:
-	char data_need_to_be_displayed[];
-};
-
-
 class Response_from_sever {
 public:
-	void vibrate_function();
-	void beep_function();
+	void v_b(char sensor);
 
 private:
 	int lasting_time;
-}; 
+};
 #pragma once
