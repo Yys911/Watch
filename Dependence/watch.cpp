@@ -1,5 +1,6 @@
 #include "watch.h"
 
+DFRobot_Heartrate heartrate(DIGITAL_MODE);
 
 void con_to_wifi(char* ssid, char* password) {
     WiFi.begin(ssid, password);
