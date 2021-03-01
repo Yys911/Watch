@@ -30,10 +30,37 @@ void RECEIVE(void) {
 
 }
 
-
+void Data_monitoring::init_step_tracker(){
+	Wire.begin();					//create i2c wire
+	Wire.beginTransmission(MPU);	//start transmission to accelerometer
+	Wire.write(0x6B); 				//reset accelerometer
+	Wire.write(0);    
+	Wire.endTransmission(true);		//end transsmission
+	stepping = false;
+    stepCount = 0;
+}
 
 void Data_monitoring::step_tracker() {
+    Wire.beginTransmission(MPU);	//begin i2c transsmoion from accelerometer
+	Wire.write(0x3B);  				//go to the regeister where where data stored
+	Wire.endTransmission(false);	//reset transsmission just incase
+	Wire.requestFrom(MPU,6,true);  	//request 6 bytes from MPU(accelereometer
+	
+	accX=Wire.read()<<8|Wire.read();//read both x-axis accerlerometer bytes and put them together to be 16 bits
+	accY=Wire.read()<<8|Wire.read();//same for y-axis
+	accZ=Wire.read()<<8|Wire.read();//same for z-axis
+	totalAc = sqrt(accX*accX + accY*accY + accZ*accZ);//calc magnitude of the acceleration 
 
+	if(totalAc>26504 && !stepping){	//hystorisis switching points for steps
+		stepping = true;
+		stepCount++;
+	}else if(totalAc<22427 && stepping){
+		stepping = false;
+	}
+	
+	Serial.println(stepCount);		//print step count to monitor for debuging
+    
+	//return stepCount;				//return value
 }
 
 void Data_monitoring::heartrate_tracker() {
