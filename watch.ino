@@ -1,12 +1,12 @@
 /*
  Name:		watch.ino
  Created:	2021/2/27 22:30:44
- Author:	yiyison
+ Author:	yiyison, ps2g19
 */
 
 
 #include "watch.h"
-#include "watch.h"
+//#include "watch.h"
 #include "TimerOne.h"
 
 #define ssid "qwe"
@@ -29,9 +29,11 @@ void setup() {
     attachInterrupt(digitalPinToInterrupt(5), RECEIVE, mode);    //set RECEIVE as interrupt function
     Timer1.initialize(30000000);    //initialise Timer1, interrupt every 30s
     Timer1.attachInterrupt(SEND);    //set SEND as interrupt function
+    Data_monitoring Data_monitoring;
+    Data_monitoring.init_step_tracker();
 }
 
 // the loop function runs over and over again until power down or reset
 void loop() {
-  
+  Data_monitoring.step_tracker();
 }
