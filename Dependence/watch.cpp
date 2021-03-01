@@ -46,6 +46,7 @@ void Data_monitoring::step_tracker() {
 	Wire.write(0x3B);  				//go to the regeister where where data stored
 	Wire.endTransmission(false);	//reset transsmission just incase
 	Wire.requestFrom(MPU,6,true);  	//request 6 bytes from MPU(accelereometer
+	int16_t accX, accY, accZ, totalAcc;
 	
 	accX=Wire.read()<<8|Wire.read();//read both x-axis accerlerometer bytes and put them together to be 16 bits
 	accY=Wire.read()<<8|Wire.read();//same for y-axis
