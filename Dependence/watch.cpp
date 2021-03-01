@@ -2,12 +2,19 @@
 
 
 void con_to_wifi(char* ssid, char* password) {
+    WiFi.setPins(8, 2, A3, -1);
+    while (!SerialMonitorInterface);
+
+    // Attempt to connect to Wifi network:
+    SerialMonitorInterface.print("Connecting Wifi: ");
+    SerialMonitorInterface.println(ssid);
+
+    // Connect to WiFi, and loop until connection is secured
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
+        SerialMonitorInterface.print(".");
         delay(500);
-        Serial.println("Connecting to WIFI.....");
     }
-    Serial.println("Connected");
 }
 
 
@@ -95,10 +102,27 @@ void Display::display_function() {
 }
 
 
-void Response_from_sever::vibrate_function() {
+void Response_from_sever::v_b(char sensor) {
+    int pin = 0;
+    if (sensor == 'v') {
+        pin = vibrate_pin;
+    }
+    else if (sensor == 'b') {
+        pin = beep_pin;
+    }
+    else {
 
+    }
+
+    for (int i = 0; i < 3; i++) {
+        digitalWrite(pin, HIGH);
+        delay(100);
+        digitalWrite(pin, LOW);
+        delay(100);
+        digitalWrite(pin, HIGH);
+        delay(100);
+        digitalWrite(pin, LOW);
+        delay(1000 - 300);
+    }
 }
 
-void Response_from_sever::beep_function() {
-
-}
