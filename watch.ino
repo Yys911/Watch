@@ -6,17 +6,14 @@
 
 
 #include "watch.h"
-//#include "watch.h"
-//#include "TimerOne.h"
-
-#define ssid "qwe"
-#define password "123"
-
-#define MODE CHANGE
+#include "TimerOne.h"
 
 
-Display dis;
+Response_from_sever response_from_sever;
 Data_monitoring data_monitoring;
+
+char ssid[] = "qqq";    //network SSID (name)
+char password[] = "***";    //network password
 
 
 // the setup function runs once when you press reset or power the board
@@ -24,17 +21,21 @@ void setup() {
     /*
       I/O pin setups
     */
+
     Serial.begin(9600);
     Wire.begin();
-    dis.ini();    //initialise screen
-    con_to_wifi(ssid, password);    //connect to specified wifi
-    attachInterrupt(digitalPinToInterrupt(5), RECEIVE, MODE);    //set RECEIVE as interrupt function
-    //Timer1.initialize(30000000);    //initialise Timer1, interrupt every 30s
-    //Timer1.attachInterrupt(SEND);    //set SEND as interrupt function
+    screen_ini();    //initialise screen
+
     data_monitoring.init_step_tracker();
+
+    attachInterrupt(digitalPinToInterrupt(5), RECEIVE, RISING);    //set RECEIVE as interrupt function
+    Timer1.initialize(30000000);    //initialise Timer1, interrupt every 30s
+    Timer1.attachInterrupt(SEND);    //set SEND as interrupt function
+
+    con_to_wifi(ssid, password);    //connect to specified wifi
 }
 
 // the loop function runs over and over again until power down or reset
 void loop() {
-  data_monitoring.step_tracker();
+    data_monitoring.step_tracker();
 }
