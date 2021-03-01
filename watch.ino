@@ -6,7 +6,6 @@
 
 
 #include "watch.h"
-//#include "watch.h"
 #include "TimerOne.h"
 
 #define ssid "qwe"
@@ -14,7 +13,18 @@
 #define heartrate_pin A0
 
 
-Display dis;
+#define heartrate_pin A0
+#define vibrate_pin A1
+#define beep_pin A2
+
+
+Display Display;
+Response_from_sever Response_from_sever;
+Data_monitoring Data_monitoring;
+
+
+char ssid[] = "qqq";    //network SSID (name)
+char password[] = "***";    //network password
 
 
 // the setup function runs once when you press reset or power the board
@@ -29,7 +39,6 @@ void setup() {
     attachInterrupt(digitalPinToInterrupt(5), RECEIVE, mode);    //set RECEIVE as interrupt function
     Timer1.initialize(30000000);    //initialise Timer1, interrupt every 30s
     Timer1.attachInterrupt(SEND);    //set SEND as interrupt function
-    Data_monitoring Data_monitoring;
     Data_monitoring.init_step_tracker();
 }
 
