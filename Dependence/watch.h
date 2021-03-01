@@ -26,6 +26,11 @@
 
 //#define heartrate_pin A0
 
+#define xStill 1636
+#define yStill 192
+#define zStill 17536
+#define MPU 0x68	//since AD0 = LOW
+
 
 void con_to_wifi(char* ssid, char* password);
 void mean(double* nums);
@@ -39,13 +44,15 @@ DFRobot_Heartrate heartrate(DIGITAL_MODE);
 class Data_monitoring {
 public:
 	void step_tracker();
+	void init_step_tracker();
 	void heartrate_tracker();
 	void calories_buring_tracker();
 	void whether_sleeping();
 
 private:
-	uint8_t heart_rate;
-	int daily_steps;
+	bool stepping;
+	uint16_t heart_rate;
+	uint16_t stepCount;
 	int calories_burning;
 	bool sleeping;
 
