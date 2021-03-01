@@ -6,7 +6,15 @@
 
 
 #include "watch.h"
+#include "watch.h"
 #include "TimerOne.h"
+
+#define ssid "qwe"
+#define password "123"
+#define heartrate_pin A0
+
+
+Display dis;
 
 
 // the setup function runs once when you press reset or power the board
@@ -14,10 +22,13 @@ void setup() {
     /*
       I/O pin setups
     */
-    attachInterrupt(digitalPinToInterrupt(pin), RECEIVE, mode);  //set RECEIVE as 																	 interrupt function
-
-    Timer1.initialize(500000);		//initialise Timer1, interrupt every 0.5s
-    Timer1.attachInterrupt(SEND);		//set SEND as interrupt functions
+    Serial.begin(9600);
+    Wire.begin();
+    dis.ini();    //initialise screen
+    con_to_wifi(ssid, password);    //connect to specified wifi
+    attachInterrupt(digitalPinToInterrupt(5), RECEIVE, mode);    //set RECEIVE as interrupt function
+    Timer1.initialize(30000000);    //initialise Timer1, interrupt every 30s
+    Timer1.attachInterrupt(SEND);    //set SEND as interrupt function
 }
 
 // the loop function runs over and over again until power down or reset
