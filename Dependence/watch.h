@@ -3,6 +3,12 @@
   by Yishun Zhao
  */
 
+#if defined(ARDUINO_ARCH_SAMD)
+    #define SerialMonitorInterface SerialUSB
+#else
+	#define SerialMonitorInterface Serial
+#endif
+
 
 #ifndef _WATCH_h
 #define _WATCH_h
@@ -12,19 +18,14 @@
 #else
 	#include "WProgram.h"
 #endif
-
-
 #endif
 
 
-//#include "sensors.h"				//the library declears sensors functions
-#include <WiFi.h>
+#include <WiFi101.h>
 #include <Wire.h>
 #include <ACROBOTIC_SSD1306.h>		//library for displaying data
 #include <ArduinoJson.h>			//library for serialization and deserialization
 #include <DFRobot_Heartrate.h>		//library for heart rate sensor
-
-//#define heartrate_pin A0
 
 #define xStill 1636
 #define yStill 192
@@ -71,8 +72,7 @@ private:
 
 class Response_from_sever {
 public:
-	void vibrate_function();
-	void beep_function();
+	void v_b(char sensor);
 
 private:
 	int lasting_time;
