@@ -71,13 +71,12 @@ void Data_monitoring::step_tracker() {
 }
 
 void Data_monitoring::heartrate_tracker() {
-    uint8_t rateValue[20];
+    uint16_t rateValue[20];
     for (int i = 0; i < 20; i++) {
         heartrate.getValue(heartrate_pin);    //A0 foot sampled values
         rateValue[i] = heartrate.getRate();    //Get heart rate value
     }
     heart_rate = mean(rateValue);
-    //delay(20);
 }
 
 void Data_monitoring::calories_buring_tracker() {
