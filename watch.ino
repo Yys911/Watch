@@ -8,12 +8,8 @@
 
 #include "watch.h"
 
-Server_related server;
 Data_monitoring data_moni;
 
-const char* ssid = "qqq";    //network SSID (name)
-const char* password = "***";    //network password
-const char* mqttServer = "3.133.147.7";
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -28,13 +24,14 @@ void setup() {
 
     //attachInterrupt(digitalPinToInterrupt(5), receive, RISING);    //set RECEIVE as interrupt function
 
-    server.connectWifi(ssid, password);    //connect to specified wifi
-    server.connectMQTTServer(mqttServer);
+    connectAWS();
 }
 
 // the loop function runs over and over again until power down or reset
 void loop() {
-    server.loop();
-    send(data_moni);
-    data_moni.step_tracker();
+    client.loop();
+    data_moni.step_tracker(); 
+    if (millis() % time == 0) {
+        publishMessage();
+    }
 }
