@@ -15,13 +15,20 @@
 #endif
 
 
-#include <WiFi101.h>
-#include <PubSubClient.h>
+#include <WiFi.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>		//library for displaying data
 #include <DFRobot_Heartrate.h>		//library for heart rate sensor
+#include "secrets.h"
+#include <WiFiClientSecure.h>
+#include <MQTTClient.h>
+#include <ArduinoJson.h>
 
+#define Weight 60
+#define Height 170
+#define Stride 60
+#define time 60000
 #define heartrate_pin 3
 #define vibrate_pin 4
 #define beep_pin 5
@@ -32,13 +39,18 @@
 #define SCREEN_WIDTH 128     // OLED display width, in pixels
 #define SCREEN_HEIGHT 32     // OLED display height, in pixels
 #define OLED_RESET -1        // Reset pin # for screen(or -1 if sharing Arduino reset pin)
+#define AWS_IOT_PUBLISH_TOPIC   "arduino/outgoing"
+#define AWS_IOT_SUBSCRIBE_TOPIC "arduino/incoming"
 
 
 enum Var_name { Stepping, Heart_rate, StepCount, Calories_burning, Sleeping };
 
 
 uint16_t mean_val(uint16_t* nums);
-
+void connectAWS();
+void publishMessage();
+void messageHandler(String& topic, String& payload);
+void v_b(byte* sensor);
 
 class Data_monitoring {
 public:
@@ -61,16 +73,6 @@ private:
 	uint16_t fat_burning;
 	uint16_t distance;
 
-};
-
-
-class Server_related {
-public:
-	void v_b(byte* sensor);
-	friend void callback(char* topic, byte* payload, unsigned int length);    //Function to receive data from the server
-	void connectWifi(const char* ssid, const char* password);
-	void connectMQTTServer(const char* mqttServer);
-	void loop(void);
 };
 
 #endif
