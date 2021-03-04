@@ -1,15 +1,9 @@
 #include "watch.h"
-#define Weight 60
-#define Height 170
-#define Stride 60
-
-const unsigned int time = 600000;
-unsigned long nowtime = 0;
 
 DFRobot_Heartrate heartrate(DIGITAL_MODE);
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-WiFiClient wifiClient;
-PubSubClient mqttClient(wifiClient);
+WiFiClientSecure net = WiFiClientSecure();
+MQTTClient client = MQTTClient(256);
 
 
 uint16_t mean_val(uint16_t* nums) {
@@ -22,18 +16,89 @@ uint16_t mean_val(uint16_t* nums) {
     return mean;
 }
 
-void callback(char* topic, byte* payload, unsigned int length) {
-    //v_b(payload);
+void connectAWS()
+{
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+    Serial.println("Connecting to Wi-Fi");
+
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+
+    // Configure WiFiClientSecure to use the AWS IoT device credentials
+    net.setCACert(AWS_CERT_CA);
+    net.setCertificate(AWS_CERT_CRT);
+    net.setPrivateKey(AWS_CERT_PRIVATE);
+
+    // Connect to the MQTT broker on the AWS endpoint we defined earlier
+    client.begin(AWS_IOT_ENDPOINT, 8883, net);
+
+    // Create a message handler
+    client.onMessage(messageHandler);
+
+    Serial.print("Connecting to AWS IOT");
+
+    while (!client.connect(THINGNAME)) {
+        Serial.print(".");
+        delay(100);
+    }
+
+    if (!client.connected()) {
+        Serial.println("AWS IoT Timeout!");
+        return;
+    }
+
+    // Subscribe to a topic
+    client.subscribe(AWS_IOT_SUBSCRIBE_TOPIC);
+
+    Serial.println("AWS IoT Connected!");
 }
 
-void send(Data_monitoring data_moni) {
+void publishMessage()
+{
+    StaticJsonDocument<200> doc;
+    doc["time"] = millis();
+    doc["sensor_a0"] = analogRead(34);
+    char jsonBuffer[512];
+    serializeJson(doc, jsonBuffer); // print to client
 
-    nowtime = millis();
-    if (nowtime == time) {
-        mqttClient.publish("Heart_Rate", data_moni.heart_rate);
-        mqttClient.publish("Step_Count", data_moni.stepCount);
-        mqttClient.publish("Calories_Burning", data_moni.calories_burning);
+    client.publish(AWS_IOT_PUBLISH_TOPIC, "Hello World!");
+    Serial.println("Publishing message");
+}
 
+void messageHandler(String& topic, String& payload) {
+    Serial.println("incoming: " + topic + " - " + payload);
+
+    //  StaticJsonDocument<200> doc;
+    //  deserializeJson(doc, payload);
+    //  const char* message = doc["message"];
+}
+
+void v_b(byte* sensor) {
+
+    int pin = 0;
+    if (sensor == 'v') {
+        pin = vibrate_pin;
+    }
+    else if (sensor == 'b') {
+        pin = beep_pin;
+    }
+    else {
+
+    }
+
+    for (int i = 0; i < 3; i++) {
+        digitalWrite(pin, HIGH);
+        delay(100);
+        digitalWrite(pin, LOW);
+        delay(100);
+        digitalWrite(pin, HIGH);
+        delay(100);
+        digitalWrite(pin, LOW);
+        delay(1000 - 300);
     }
 }
 
@@ -133,69 +198,4 @@ void Data_monitoring::display_data() {
     display.setCursor(0, 40);
     display.print("Calories buring: "); display.print(calories_burning); display.print(" kcal");
     display.display();
-}
-
-
-void Server_related::connectWifi(const char* ssid, const char* password) {
-    
-    WiFi.setPins(8, 2, A3, -1);
-    while (!SerialMonitorInterface);
-
-    // Attempt to connect to Wifi network:
-    display.setCursor(0, 0);
-    display.print("Connecting Wifi: ");
-    display.setCursor(0, 20);
-    display.print(ssid);
-    display.display();
-
-    // Connect to WiFi, and loop until connection is secured
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
-        display.print(".");
-        display.display();
-        delay(500);
-    }
-    display.clearDisplay();
-}
-
-void Server_related::connectMQTTServer(const char* mqttServer) {
-    mqttClient.setServer(mqttServer, 1883);
-    if (mqttClient.connect("Watch")) {
-        Serial.println("MQTT Server Connected.");
-    }
-    else {
-        Serial.print("MQTT Server Connect Failed. Client State:");
-        Serial.println(mqttClient.state());
-        delay(3000);
-    }
-    mqttClient.setCallback(callback);
-}
-
-void Server_related::loop(void) {
-    mqttClient.loop();
-}
-
-void Server_related::v_b(byte* sensor) {
-    
-    int pin = 0;
-    if (sensor == 'v') {
-        pin = vibrate_pin;
-    }
-    else if (sensor == 'b') {
-        pin = beep_pin;
-    }
-    else {
-
-    }
-
-    for (int i = 0; i < 3; i++) {
-        digitalWrite(pin, HIGH);
-        delay(100);
-        digitalWrite(pin, LOW);
-        delay(100);
-        digitalWrite(pin, HIGH);
-        delay(100);
-        digitalWrite(pin, LOW);
-        delay(1000 - 300);
-    }
 }
